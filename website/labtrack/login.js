@@ -73,6 +73,7 @@ form.addEventListener('submit', async (e) => {
     const data = await response.json();
 
     if (data.success) {
+      sessionStorage.setItem('labtrack_user', username);
       window.location.href = data.redirect || 'dashboard.html';
     } else {
       showError(data.message || 'Login failed. Please try again.');

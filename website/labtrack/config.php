@@ -2,8 +2,8 @@
 // Database configuration for venthaim_labtrack on cPanel
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'venthaim_labtrack');
-define('DB_USER', 'venthaimao');    // ← your cPanel MySQL username (update if different)
-define('DB_PASS', '');              // ← fill in your cPanel MySQL password
+define('DB_USER', 'root');          // local XAMPP
+define('DB_PASS', '');              // local XAMPP (no password)
 define('DB_CHARSET', 'utf8mb4');
 
 function getDB(): PDO {
