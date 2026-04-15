@@ -1,0 +1,236 @@
+/* ── Reset & base ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --clr-bg:        #0f172a;
+  --clr-surface:   #1e293b;
+  --clr-border:    #334155;
+  --clr-primary:   #38bdf8;
+  --clr-primary-h: #0ea5e9;
+  --clr-text:      #f1f5f9;
+  --clr-muted:     #94a3b8;
+  --clr-error:     #f87171;
+  --clr-error-bg:  #450a0a;
+  --radius:        12px;
+  --shadow:        0 25px 50px -12px rgba(0,0,0,.6);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background subtle grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ── Page wrapper ─────────────────────────────────────────── */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  padding: 24px 16px;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.login-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.3);
+  border-radius: 14px;
+  color: var(--clr-primary);
+  margin-bottom: 16px;
+}
+
+.logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.login-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--clr-text);
+}
+
+.login-header p {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--clr-muted);
+}
+
+/* ── Form ─────────────────────────────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clr-muted);
+  letter-spacing: 0.02em;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: 8px;
+  color: var(--clr-text);
+  font-size: 0.95rem;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 3px rgba(56,189,248,.15);
+}
+
+input::placeholder {
+  color: #475569;
+}
+
+/* Password field with toggle */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 44px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--clr-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color .2s;
+}
+
+.toggle-password:hover {
+  color: var(--clr-primary);
+}
+
+.toggle-password svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Error message ────────────────────────────────────────── */
+.error-message {
+  display: none;
+  background: var(--clr-error-bg);
+  border: 1px solid var(--clr-error);
+  color: var(--clr-error);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  margin-bottom: 18px;
+}
+
+.error-message.visible {
+  display: block;
+}
+
+/* ── Submit button ────────────────────────────────────────── */
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: var(--clr-primary);
+  color: #0f172a;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .2s, transform .1s;
+}
+
+.btn-login:hover:not(:disabled) {
+  background: var(--clr-primary-h);
+}
+
+.btn-login:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner animation */
+.btn-spinner svg {
+  width: 18px;
+  height: 18px;
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.footer-text {
+  font-size: 0.8rem;
+  color: #475569;
+}
