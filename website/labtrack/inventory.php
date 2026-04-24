@@ -317,6 +317,7 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
     <span class="brand">🧪 LabTrack</span>
     <a href="dashboard.html">Dashboard</a>
     <a href="inventory.php">Inventory</a>
+    <a href="document_page/document.php">Documents</a>
     <a href="logout.php">Log out (<?= $username ?>)</a>
 </nav>
 
