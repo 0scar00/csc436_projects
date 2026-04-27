@@ -86,242 +86,284 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory — LabTrack</title>
+    <link rel="stylesheet" href="login.css" />
+    <link rel="stylesheet" href="dashboard.css" />
     <style>
-        /* ── Reset & base ─────────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f4f8;
-            color: #1e293b;
-            min-height: 100vh;
-        }
-
-        /* ── Nav ──────────────────────────────────────────────────────────── */
-        nav {
-            background: #1e40af;
-            color: #fff;
-            padding: 0 1.5rem;
+        /* ── Page heading override ────────────────────────────────────────── */
+        .page-wrapper-inv {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 28px 48px;
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            height: 56px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 6px rgba(0,0,0,.25);
-        }
-        nav .brand {
-            font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: .03em;
-            margin-right: auto;
-        }
-        nav a {
-            color: rgba(255,255,255,.85);
-            text-decoration: none;
-            font-size: .9rem;
-            padding: .25rem .5rem;
-            border-radius: 4px;
-            transition: background .15s;
-        }
-        nav a:hover { background: rgba(255,255,255,.15); color: #fff; }
-
-        /* ── Page layout ──────────────────────────────────────────────────── */
-        .page-wrapper { max-width: 1100px; margin: 2rem auto; padding: 0 1.25rem; }
-
-        h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 1.25rem;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        /* ── Filter bar ───────────────────────────────────────────────────── */
+        /* ── Filter bar (dark) ────────────────────────────────────────────── */
         .filter-bar {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
             display: flex;
             flex-wrap: wrap;
-            gap: .75rem;
+            gap: 12px;
             align-items: flex-end;
-            margin-bottom: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
         }
         .filter-bar label {
             display: flex;
             flex-direction: column;
-            gap: .3rem;
-            font-size: .85rem;
+            gap: 4px;
+            font-size: .78rem;
             font-weight: 600;
-            color: #475569;
+            color: var(--clr-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         .filter-bar input[type="text"] {
-            padding: .45rem .75rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: .95rem;
+            padding: 8px 12px;
+            background: var(--clr-bg);
+            border: 1px solid var(--clr-border);
+            border-radius: 8px;
+            color: var(--clr-text);
+            font-size: .9rem;
             width: 240px;
+            outline: none;
             transition: border-color .15s, box-shadow .15s;
         }
         .filter-bar input[type="text"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+            border-color: var(--clr-primary);
+            box-shadow: 0 0 0 3px rgba(56,189,248,.15);
         }
+        .filter-bar input::placeholder { color: #475569; }
         .checkbox-label {
             flex-direction: row !important;
             align-items: center;
             gap: .4rem !important;
             cursor: pointer;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            font-size: .85rem !important;
+            color: var(--clr-text) !important;
         }
-        .checkbox-label input { width: 16px; height: 16px; cursor: pointer; }
+        .checkbox-label input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--clr-primary);
+        }
 
+        /* ── Buttons (dark theme) ─────────────────────────────────────────── */
         .btn {
             display: inline-flex;
             align-items: center;
             gap: .35rem;
-            padding: .45rem 1rem;
-            border: none;
-            border-radius: 6px;
-            font-size: .9rem;
+            padding: 8px 18px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: .85rem;
             font-weight: 600;
             cursor: pointer;
-            transition: filter .15s;
+            transition: background .2s, border-color .2s, color .2s, filter .2s;
             text-decoration: none;
         }
-        .btn:hover { filter: brightness(1.1); }
-        .btn-primary  { background: #1e40af; color: #fff; }
-        .btn-outline  { background: #fff; color: #475569; border: 1px solid #cbd5e1; }
-        .btn-sm       { padding: .3rem .75rem; font-size: .82rem; }
-        .btn-log      { background: #0891b2; color: #fff; }
+        .btn-primary {
+            background: var(--clr-primary);
+            color: #0f172a;
+            border-color: var(--clr-primary);
+        }
+        .btn-primary:hover {
+            background: var(--clr-primary-h);
+            border-color: var(--clr-primary-h);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--clr-muted);
+            border: 1px solid var(--clr-border);
+        }
+        .btn-outline:hover {
+            border-color: var(--clr-primary);
+            color: var(--clr-primary);
+        }
+        .btn-sm { padding: 6px 12px; font-size: .78rem; }
+        .btn-log {
+            background: rgba(56,189,248,.12);
+            color: var(--clr-primary);
+            border: 1px solid rgba(56,189,248,.3);
+        }
+        .btn-log:hover {
+            background: rgba(56,189,248,.2);
+            border-color: var(--clr-primary);
+            color: var(--clr-primary);
+        }
 
-        /* ── Stats chips ──────────────────────────────────────────────────── */
+        /* ── Stat chips (dark) ────────────────────────────────────────────── */
         .stats-row {
             display: flex;
-            gap: .75rem;
-            margin-bottom: 1rem;
+            gap: 12px;
             flex-wrap: wrap;
         }
         .chip {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: .5rem 1rem;
-            font-size: .82rem;
-            color: #64748b;
-            box-shadow: 0 1px 2px rgba(0,0,0,.05);
-        }
-        .chip strong { color: #1e293b; font-size: 1.1rem; display: block; }
-
-        /* ── Table ────────────────────────────────────────────────────────── */
-        .table-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
+            padding: 10px 16px;
+            font-size: .78rem;
+            color: var(--clr-muted);
         }
-        table {
+        .chip strong {
+            color: var(--clr-text);
+            font-size: 1.2rem;
+            display: block;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        /* ── Table card (dark) ────────────────────────────────────────────── */
+        .table-card {
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .table-card table {
             width: 100%;
             border-collapse: collapse;
-            font-size: .9rem;
+            font-size: .875rem;
         }
-        thead th {
-            background: #f8fafc;
-            padding: .75rem 1rem;
+        .table-card thead th {
+            background: rgba(255,255,255,.03);
+            padding: 12px 14px;
             text-align: left;
-            font-size: .78rem;
+            font-size: .72rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .06em;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
+            color: var(--clr-muted);
+            border-bottom: 1px solid var(--clr-border);
             white-space: nowrap;
         }
-        tbody tr { border-bottom: 1px solid #f1f5f9; transition: background .1s; }
-        tbody tr:last-child { border-bottom: none; }
-        tbody tr:hover { background: #f8fafc; }
-        tbody td { padding: .7rem 1rem; vertical-align: middle; }
+        .table-card tbody tr {
+            border-bottom: 1px solid rgba(51,65,85,.5);
+            transition: background .15s;
+        }
+        .table-card tbody tr:last-child { border-bottom: none; }
+        .table-card tbody tr:hover { background: rgba(255,255,255,.03); }
+        .table-card tbody td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            color: var(--clr-text);
+        }
 
-        /* ── Row status colours ───────────────────────────────────────────── */
-        .row-expired      { background: #fff1f2; }
-        .row-expired:hover{ background: #ffe4e6; }
-        .row-expiring-soon      { background: #fffbeb; }
-        .row-expiring-soon:hover{ background: #fef3c7; }
+        /* ── Row status colours (dark variants) ───────────────────────────── */
+        .row-expired       { background: rgba(248,113,113,.06); }
+        .row-expired:hover { background: rgba(248,113,113,.12) !important; }
+        .row-expiring-soon       { background: rgba(251,191,36,.06); }
+        .row-expiring-soon:hover { background: rgba(251,191,36,.12) !important; }
 
-        /* ── Badges ───────────────────────────────────────────────────────── */
+        /* ── Badges (dark variants — keep existing class names) ───────────── */
         .badge {
             display: inline-block;
-            padding: .15rem .55rem;
-            border-radius: 999px;
-            font-size: .75rem;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: .74rem;
             font-weight: 600;
             white-space: nowrap;
         }
-        .badge-flammable  { background: #fef9c3; color: #854d0e; }
-        .badge-corrosive  { background: #fee2e2; color: #991b1b; }
-        .badge-irritant   { background: #e0f2fe; color: #075985; }
-        .badge-low        { background: #dcfce7; color: #166534; }
-        .badge-default    { background: #f1f5f9; color: #475569; }
+        .badge-flammable { background: rgba(251,191,36,.15);  color: #fbbf24; }
+        .badge-corrosive { background: rgba(248,113,113,.15); color: #f87171; }
+        .badge-irritant  { background: rgba(56,189,248,.15);  color: #38bdf8; }
+        .badge-low       { background: rgba(52,211,153,.15);  color: #34d399; }
+        .badge-default   { background: rgba(148,163,184,.12); color: #94a3b8; }
 
-        .status-badge { background: #dcfce7; color: #166534; }
-        .status-low   { background: #fef9c3; color: #854d0e; }
-        .status-out   { background: #fee2e2; color: #991b1b; }
+        .status-badge { background: rgba(52,211,153,.15);  color: #34d399; }
+        .status-low   { background: rgba(251,191,36,.15);  color: #fbbf24; }
+        .status-out   { background: rgba(248,113,113,.15); color: #f87171; }
 
-        .exp-warning { color: #b45309; font-weight: 600; }
-        .exp-danger  { color: #dc2626; font-weight: 700; }
+        .exp-warning { color: #fbbf24; font-weight: 600; }
+        .exp-danger  { color: #f87171; font-weight: 700; }
 
         /* ── Empty / error state ──────────────────────────────────────────── */
         .empty-state {
             text-align: center;
-            padding: 3rem 1rem;
-            color: #94a3b8;
+            padding: 50px 20px;
+            color: var(--clr-muted);
         }
-        .empty-state p { margin-top: .5rem; font-size: .9rem; }
+        .empty-state strong { color: var(--clr-text); font-size: 1rem; }
+        .empty-state p { margin-top: 6px; font-size: .9rem; }
+
         .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
+            background: var(--clr-error-bg);
+            color: var(--clr-error);
+            border: 1px solid var(--clr-error);
             border-radius: 8px;
-            padding: .75rem 1rem;
-            margin-bottom: 1rem;
+            padding: 10px 14px;
             font-size: .9rem;
         }
 
-        /* ── Legend ───────────────────────────────────────────────────────── */
+        /* ── Legend (dark) ────────────────────────────────────────────────── */
         .legend {
             display: flex;
-            gap: 1.25rem;
-            margin-top: 1rem;
+            gap: 20px;
             flex-wrap: wrap;
             font-size: .8rem;
-            color: #64748b;
+            color: var(--clr-muted);
+            padding-top: 4px;
         }
         .legend-item { display: flex; align-items: center; gap: .4rem; }
         .legend-swatch {
-            width: 12px; height: 12px;
+            width: 12px;
+            height: 12px;
             border-radius: 3px;
-            border: 1px solid rgba(0,0,0,.1);
+            border: 1px solid var(--clr-border);
         }
-        .swatch-expired { background: #fecdd3; }
-        .swatch-soon    { background: #fde68a; }
+        .swatch-expired { background: rgba(248,113,113,.4); }
+        .swatch-soon    { background: rgba(251,191,36,.4); }
     </style>
 </head>
-<body>
+<body class="dashboard-body">
 
-<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
-<nav>
-    <span class="brand">🧪 LabTrack</span>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="inventory.php">Inventory</a>
-    <a href="logout.php">Log out (<?= $username ?>)</a>
-</nav>
+<!-- ── Top Nav (matches dashboard) ─────────────────────────────────────── -->
+<header class="topnav">
+    <div class="topnav-brand">
+        <div class="logo-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+            </svg>
+        </div>
+        <span class="brand-name">LabTrack</span>
+    </div>
 
-<div class="page-wrapper">
-    <h1>Chemical Inventory</h1>
+    <nav class="topnav-links">
+        <a href="dashboard.html"  class="nav-link">Dashboard</a>
+        <a href="inventory.php"   class="nav-link active">Inventory</a>
+        <a href="experiments.php" class="nav-link">Experiments</a>
+        <a href="documents.php"   class="nav-link">Documents</a>
+    </nav>
+
+    <div class="topnav-user">
+        <span class="user-greeting"><?= $username ?></span>
+        <a href="logout.php" class="btn-logout" style="text-decoration:none;">Sign Out</a>
+    </div>
+</header>
+
+<main class="dash-main page-wrapper-inv">
+
+    <!-- Hero -->
+    <section class="dash-hero">
+        <div class="dash-hero-text">
+            <h2>Chemical Inventory</h2>
+            <p>Browse every batch of every chemical — search, filter and log usage in one place.</p>
+        </div>
+        <div class="dash-hero-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3h18v4H3z"/><path d="M3 7v14h18V7"/>
+                <path d="M9 11h6M9 15h4"/>
+            </svg>
+        </div>
+    </section>
 
     <?php if ($error): ?>
         <div class="alert-error"><?= htmlspecialchars($error) ?></div>
@@ -492,7 +534,11 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <div class="legend-swatch swatch-soon"></div> Expiring within 30 days
         </div>
     </div>
-</div>
+</main>
+
+<footer class="dash-footer">
+    LabTrack &copy; 2026 &mdash; University of Rhode Island
+</footer>
 
 </body>
 </html>

@@ -362,6 +362,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 8px;
   padding: 14px 10px;
   background: rgba(255,255,255,.04);
@@ -371,6 +373,7 @@
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
+  text-decoration: none;
   transition: border-color .2s, color .2s, background .2s;
 }
 

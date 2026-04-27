@@ -204,260 +204,275 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log Usage — LabTrack</title>
+    <link rel="stylesheet" href="login.css" />
+    <link rel="stylesheet" href="dashboard.css" />
     <style>
-        /* ── Reset & base ─────────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f4f8;
-            color: #1e293b;
-            min-height: 100vh;
-        }
-
-        /* ── Nav ──────────────────────────────────────────────────────────── */
-        nav {
-            background: #1e40af;
-            color: #fff;
-            padding: 0 1.5rem;
+        /* ── Page wrapper override (narrower for form pages) ──────────────── */
+        .page-wrapper-form {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 24px 28px 48px;
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            height: 56px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 6px rgba(0,0,0,.25);
-        }
-        nav .brand  { font-weight: 700; font-size: 1.2rem; margin-right: auto; }
-        nav a {
-            color: rgba(255,255,255,.85);
-            text-decoration: none;
-            font-size: .9rem;
-            padding: .25rem .5rem;
-            border-radius: 4px;
-            transition: background .15s;
-        }
-        nav a:hover { background: rgba(255,255,255,.15); color: #fff; }
-
-        /* ── Page layout ──────────────────────────────────────────────────── */
-        .page-wrapper {
-            max-width: 760px;
-            margin: 2rem auto;
-            padding: 0 1.25rem;
+            flex-direction: column;
+            gap: 16px;
         }
 
         .breadcrumb {
             font-size: .85rem;
-            color: #64748b;
-            margin-bottom: 1.25rem;
+            color: var(--clr-muted);
         }
-        .breadcrumb a { color: #1e40af; text-decoration: none; }
+        .breadcrumb a {
+            color: var(--clr-primary);
+            text-decoration: none;
+        }
         .breadcrumb a:hover { text-decoration: underline; }
 
-        h1 {
+        .page-title {
             font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 1.25rem;
+            color: var(--clr-text);
+            letter-spacing: -0.02em;
         }
 
-        /* ── Cards ────────────────────────────────────────────────────────── */
+        /* ── Cards (dark) ─────────────────────────────────────────────────── */
         .card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
-            margin-bottom: 1.25rem;
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius);
+            padding: 24px;
         }
         .card h2 {
             font-size: 1rem;
             font-weight: 700;
-            color: #334155;
-            margin-bottom: 1rem;
-            padding-bottom: .5rem;
-            border-bottom: 1px solid #f1f5f9;
+            color: var(--clr-text);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--clr-border);
         }
 
         /* ── Item info grid ───────────────────────────────────────────────── */
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: .75rem 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px 24px;
         }
-        .info-cell { display: flex; flex-direction: column; gap: .15rem; }
+        .info-cell { display: flex; flex-direction: column; gap: 4px; }
         .info-cell .label {
             font-size: .72rem;
             text-transform: uppercase;
             letter-spacing: .07em;
             font-weight: 700;
-            color: #94a3b8;
+            color: var(--clr-muted);
         }
         .info-cell .value {
             font-size: .95rem;
-            color: #1e293b;
+            color: var(--clr-text);
             font-weight: 500;
         }
         .qty-display {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: #1e40af;
+            color: var(--clr-primary);
+            line-height: 1.1;
         }
 
-        /* ── Badges ───────────────────────────────────────────────────────── */
+        /* ── Badges (dark — same palette as dashboard) ────────────────────── */
         .badge {
             display: inline-block;
-            padding: .2rem .6rem;
-            border-radius: 999px;
-            font-size: .75rem;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: .74rem;
             font-weight: 600;
+            white-space: nowrap;
         }
-        .badge-flammable { background: #fef9c3; color: #854d0e; }
-        .badge-corrosive { background: #fee2e2; color: #991b1b; }
-        .badge-irritant  { background: #e0f2fe; color: #075985; }
-        .badge-low       { background: #dcfce7; color: #166534; }
-        .badge-default   { background: #f1f5f9; color: #475569; }
+        .badge-flammable { background: rgba(251,191,36,.15);  color: #fbbf24; }
+        .badge-corrosive { background: rgba(248,113,113,.15); color: #f87171; }
+        .badge-irritant  { background: rgba(56,189,248,.15);  color: #38bdf8; }
+        .badge-low       { background: rgba(52,211,153,.15);  color: #34d399; }
+        .badge-default   { background: rgba(148,163,184,.12); color: #94a3b8; }
 
-        .status-in    { background: #dcfce7; color: #166534; }
-        .status-low   { background: #fef9c3; color: #854d0e; }
-        .status-out   { background: #fee2e2; color: #991b1b; }
+        .status-in    { background: rgba(52,211,153,.15);  color: #34d399; }
+        .status-low   { background: rgba(251,191,36,.15);  color: #fbbf24; }
+        .status-out   { background: rgba(248,113,113,.15); color: #f87171; }
 
-        /* ── Form ─────────────────────────────────────────────────────────── */
+        /* ── Form (dark) ──────────────────────────────────────────────────── */
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: .35rem;
-            margin-bottom: 1rem;
+            gap: 6px;
+            margin-bottom: 16px;
         }
         .form-group:last-of-type { margin-bottom: 0; }
 
         label {
-            font-size: .85rem;
+            font-size: .8rem;
             font-weight: 600;
-            color: #475569;
+            color: var(--clr-muted);
+            letter-spacing: 0.02em;
         }
-        label .required { color: #dc2626; margin-left: .2rem; }
+        label .required { color: var(--clr-error); margin-left: .2rem; }
 
         input[type="number"],
         select,
         textarea {
             width: 100%;
-            padding: .55rem .85rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            padding: 10px 14px;
+            background: var(--clr-bg);
+            border: 1px solid var(--clr-border);
+            border-radius: 8px;
+            color: var(--clr-text);
             font-size: .95rem;
             font-family: inherit;
-            transition: border-color .15s, box-shadow .15s;
-            background: #fff;
-            color: #1e293b;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
         }
         input[type="number"]:focus,
         select:focus,
         textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+            border-color: var(--clr-primary);
+            box-shadow: 0 0 0 3px rgba(56,189,248,.15);
         }
+        input::placeholder, textarea::placeholder { color: #475569; }
         input.input-error,
         select.input-error,
         textarea.input-error {
-            border-color: #f87171;
+            border-color: var(--clr-error);
         }
-        textarea { resize: vertical; min-height: 80px; }
+        textarea { resize: vertical; min-height: 90px; }
+        select option { background: var(--clr-surface); color: var(--clr-text); }
 
         .hint {
-            font-size: .8rem;
-            color: #94a3b8;
+            font-size: .78rem;
+            color: var(--clr-muted);
         }
 
         /* ── Progress bar ─────────────────────────────────────────────────── */
         .qty-bar-wrap {
-            background: #f1f5f9;
+            background: rgba(255,255,255,.06);
             border-radius: 999px;
-            height: 8px;
+            height: 6px;
             overflow: hidden;
-            margin-top: .5rem;
+            margin-top: 6px;
         }
         .qty-bar {
             height: 100%;
             border-radius: 999px;
-            background: #22c55e;
+            background: linear-gradient(90deg, #34d399, #38bdf8);
             transition: width .4s ease;
         }
 
-        /* ── Alerts ───────────────────────────────────────────────────────── */
+        /* ── Alerts (dark) ────────────────────────────────────────────────── */
         .alert {
             border-radius: 8px;
-            padding: .9rem 1.1rem;
-            margin-bottom: 1.25rem;
+            padding: 12px 16px;
             font-size: .9rem;
             display: flex;
-            gap: .5rem;
+            gap: 10px;
             align-items: flex-start;
         }
-        .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .alert ul { margin: .4rem 0 0 1.1rem; }
-        .alert ul li { margin-top: .2rem; }
+        .alert-success {
+            background: rgba(52,211,153,.1);
+            color: #34d399;
+            border: 1px solid rgba(52,211,153,.4);
+        }
+        .alert-error {
+            background: var(--clr-error-bg);
+            color: var(--clr-error);
+            border: 1px solid var(--clr-error);
+        }
+        .alert ul { margin: 6px 0 0 18px; }
+        .alert ul li { margin-top: 2px; }
 
-        /* ── Buttons ──────────────────────────────────────────────────────── */
+        /* ── Buttons (dark) ───────────────────────────────────────────────── */
         .btn-row {
             display: flex;
-            gap: .75rem;
+            gap: 10px;
             align-items: center;
-            margin-top: 1.25rem;
+            margin-top: 20px;
         }
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: .35rem;
-            padding: .55rem 1.2rem;
-            border: none;
-            border-radius: 6px;
-            font-size: .95rem;
+            gap: .4rem;
+            padding: 10px 20px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: .9rem;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            transition: filter .15s;
+            transition: background .2s, border-color .2s, color .2s;
         }
-        .btn:hover { filter: brightness(1.1); }
-        .btn-submit  { background: #1e40af; color: #fff; }
-        .btn-cancel  { background: #fff; color: #475569; border: 1px solid #cbd5e1; }
-
+        .btn-submit {
+            background: var(--clr-primary);
+            color: #0f172a;
+            border-color: var(--clr-primary);
+        }
+        .btn-submit:hover:not(:disabled) {
+            background: var(--clr-primary-h);
+            border-color: var(--clr-primary-h);
+        }
         .btn-submit:disabled {
-            background: #93c5fd;
+            background: rgba(56,189,248,.3);
+            color: rgba(15,23,42,.6);
+            border-color: rgba(56,189,248,.3);
             cursor: not-allowed;
-            filter: none;
+        }
+        .btn-cancel {
+            background: transparent;
+            color: var(--clr-muted);
+            border: 1px solid var(--clr-border);
+        }
+        .btn-cancel:hover {
+            border-color: var(--clr-primary);
+            color: var(--clr-primary);
         }
 
         /* ── Transaction notice ───────────────────────────────────────────── */
         .tx-note {
             font-size: .78rem;
-            color: #64748b;
-            margin-top: .5rem;
+            color: var(--clr-muted);
+            margin-top: 12px;
             display: flex;
             align-items: center;
-            gap: .35rem;
+            gap: 6px;
         }
     </style>
 </head>
-<body>
+<body class="dashboard-body">
 
-<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
-<nav>
-    <span class="brand">🧪 LabTrack</span>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="inventory.php">Inventory</a>
-    <a href="logout.php">Log out (<?= $username ?>)</a>
-</nav>
+<!-- ── Top Nav (matches dashboard) ─────────────────────────────────────── -->
+<header class="topnav">
+    <div class="topnav-brand">
+        <div class="logo-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+            </svg>
+        </div>
+        <span class="brand-name">LabTrack</span>
+    </div>
 
-<div class="page-wrapper">
+    <nav class="topnav-links">
+        <a href="dashboard.html"  class="nav-link">Dashboard</a>
+        <a href="inventory.php"   class="nav-link active">Inventory</a>
+        <a href="experiments.php" class="nav-link">Experiments</a>
+        <a href="documents.php"   class="nav-link">Documents</a>
+    </nav>
+
+    <div class="topnav-user">
+        <span class="user-greeting"><?= $username ?></span>
+        <a href="logout.php" class="btn-logout" style="text-decoration:none;">Sign Out</a>
+    </div>
+</header>
+
+<main class="page-wrapper-form">
 
     <div class="breadcrumb">
         <a href="inventory.php">← Back to Inventory</a>
     </div>
 
-    <h1>Log Chemical Usage</h1>
+    <h1 class="page-title">Log Chemical Usage</h1>
 
     <?php if ($success_msg): ?>
         <div class="alert alert-success">
@@ -647,7 +662,11 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
     <?php endif; ?>
     <?php endif; // $item exists ?>
 
-</div>
+</main>
+
+<footer class="dash-footer">
+    LabTrack &copy; 2026 &mdash; University of Rhode Island
+</footer>
 
 <script>
 // ── Client-side "remaining" preview ──────────────────────────────────────────
@@ -667,11 +686,11 @@ function previewRemaining(val) {
     const remaining = maxQty - used;
     if (remaining < 0) {
         hint.textContent = `⚠ Exceeds available stock by ${Math.abs(remaining).toFixed(2)} ${unit}`;
-        hint.style.color = '#dc2626';
+        hint.style.color = '#f87171';
         submitBtn.disabled = true;
     } else {
         hint.textContent = `Remaining after use: ${remaining.toFixed(2)} ${unit}`;
-        hint.style.color = remaining < 100 ? '#b45309' : '#16a34a';
+        hint.style.color = remaining < 100 ? '#fbbf24' : '#34d399';
         submitBtn.disabled = false;
     }
 }
