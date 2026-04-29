@@ -252,6 +252,7 @@ function statusBadge(string $status): string {
         <a href="inventory.php"  class="nav-link">Inventory</a>
         <a href="experiments.php" class="nav-link active">Experiments</a>
         <a href="documents.php"  class="nav-link">Documents</a>
+        <a href="chem_usage.php" class="nav-link">Chemical Usage</a>
     </nav>
 
     <div class="topnav-user">
