@@ -12,6 +12,52 @@ if (!$logged_in) {
 }
 
 // ── Input sanitization ────────────────────────────────────────────────────────
+// Handle Add Chemical form submission
+$addErr = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_chemical') {
+    $chem_name       = trim($_POST['chem_name']       ?? '');
+    $cas_number      = trim($_POST['cas_number']      ?? '');
+    $hazard_class    = trim($_POST['hazard_class']    ?? '');
+    $default_unit    = trim($_POST['default_unit']    ?? '');
+    $supplier_id     = (int)($_POST['supplier_id']   ?? 0);
+    $lot_number      = trim($_POST['lot_number']      ?? '');
+    $received_date   = trim($_POST['received_date']   ?? '');
+    $expiration_date = trim($_POST['expiration_date'] ?? '');
+    $concentration   = (($_POST['concentration'] ?? '') !== '') ? (float)$_POST['concentration'] : null;
+    $unit_cost       = (float)($_POST['unit_cost']    ?? 0);
+    $location_id     = (int)($_POST['location_id']   ?? 0);
+    $quantity        = (float)($_POST['quantity']     ?? 0);
+    $unit            = trim($_POST['unit']            ?? '');
+    $inv_status      = trim($_POST['inv_status']      ?? 'In Stock');
+
+    if (!$chem_name || !$cas_number || !$hazard_class || !$default_unit ||
+        !$supplier_id || !$lot_number || !$received_date || !$expiration_date ||
+        !$unit_cost || !$location_id || !$quantity || !$unit) {
+        $addErr = 'Please fill in all required fields.';
+    } else {
+        try {
+            $pdo->beginTransaction();
+            $pdo->prepare("INSERT INTO Chemical (chemical_name, cas_number, hazard_class, default_unit) VALUES (?,?,?,?)")
+                ->execute([$chem_name, $cas_number, $hazard_class, $default_unit]);
+            $chemical_id = (int)$pdo->lastInsertId();
+
+            $pdo->prepare("INSERT INTO Batch (supplier_id, chemical_id, lot_number, received_date, expiration_date, concentration, unit_cost) VALUES (?,?,?,?,?,?,?)")
+                ->execute([$supplier_id, $chemical_id, $lot_number, $received_date, $expiration_date, $concentration, $unit_cost]);
+            $batch_id = (int)$pdo->lastInsertId();
+
+            $pdo->prepare("INSERT INTO Inventory_item (batch_id, location_id, quantity, unit, status) VALUES (?,?,?,?,?)")
+                ->execute([$batch_id, $location_id, $quantity, $unit, $inv_status]);
+            $pdo->commit();
+            header('Location: inventory.php');
+            exit;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            error_log('Add chemical error: ' . $e->getMessage());
+            $addErr = 'Failed to add chemical. Please try again.';
+        }
+    }
+}
+
 $search        = trim($_GET['search']     ?? '');
 $expiring_soon = isset($_GET['expiring_soon']) && $_GET['expiring_soon'] === '1';
 
@@ -76,6 +122,15 @@ function expiryClass(string $expDate): string {
     if ($days < 0)   return 'row-expired';
     if ($days <= 30) return 'row-expiring-soon';
     return '';
+}
+
+// Fetch suppliers and storage locations for Add Chemical modal
+try {
+    $suppliers = $pdo->query("SELECT supplier_id, supplier_name FROM Supplier ORDER BY supplier_name ASC")->fetchAll();
+    $locations = $pdo->query("SELECT location_id, location_name FROM Storage_location ORDER BY location_name ASC")->fetchAll();
+} catch (PDOException $e) {
+    $suppliers = [];
+    $locations = [];
 }
 
 $username = htmlspecialchars($_SESSION['username'] ?? 'User');
@@ -319,6 +374,154 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
         }
         .swatch-expired { background: rgba(248,113,113,.4); }
         .swatch-soon    { background: rgba(251,191,36,.4); }
+
+        /* -- Add-record modal ------------------------------------------------- */
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: 9px 18px;
+            background: var(--clr-primary);
+            color: #0f172a;
+            border: 1px solid var(--clr-primary);
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+            text-decoration: none;
+        }
+        .btn-add:hover { background: var(--clr-primary-h); }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--clr-surface);
+            border: 1px solid var(--clr-border);
+            border-radius: var(--radius);
+            padding: 26px 30px 20px;
+            width: 100%;
+            max-width: 640px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--clr-text);
+            margin-bottom: 18px;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--clr-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .modal-close-btn:hover { color: var(--clr-text); }
+        .form-section-lbl {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--clr-muted);
+            margin: 14px 0 9px;
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 11px 18px;
+        }
+        .form-grid-2 .f-full { grid-column: 1 / -1; }
+        .f-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .f-field label {
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--clr-muted);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .f-field input,
+        .f-field select,
+        .f-field textarea {
+            padding: 8px 11px;
+            background: var(--clr-bg);
+            border: 1px solid var(--clr-border);
+            border-radius: 8px;
+            color: var(--clr-text);
+            font-size: .875rem;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .f-field input:focus,
+        .f-field select:focus,
+        .f-field textarea:focus {
+            border-color: var(--clr-primary);
+            box-shadow: 0 0 0 3px rgba(56,189,248,.15);
+        }
+        .f-field input::placeholder,
+        .f-field textarea::placeholder { color: #475569; }
+        .modal-footer-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px solid var(--clr-border);
+        }
+        .modal-save-btn {
+            padding: 8px 20px;
+            background: var(--clr-primary);
+            color: #0f172a;
+            border: 1px solid var(--clr-primary);
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .modal-save-btn:hover { background: var(--clr-primary-h); }
+        .modal-cancel-btn {
+            padding: 8px 16px;
+            background: transparent;
+            color: var(--clr-muted);
+            border: 1px solid var(--clr-border);
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color .2s, color .2s;
+        }
+        .modal-cancel-btn:hover { border-color: var(--clr-primary); color: var(--clr-primary); }
+        .modal-alert-err {
+            background: var(--clr-error-bg);
+            color: var(--clr-error);
+            border: 1px solid var(--clr-error);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: .875rem;
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 <body class="dashboard-body">
@@ -399,6 +602,12 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <a href="inventory.php" class="btn btn-outline">Clear</a>
         <?php endif; ?>
     </form>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <button type="button" class="btn-add" onclick="document.getElementById('modalAddChem').classList.add('open')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Chemical
+        </button>
+    </div>
 
     <!-- ── Stats chips ────────────────────────────────────────────────────── -->
     <?php
@@ -535,6 +744,155 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
             <div class="legend-swatch swatch-soon"></div> Expiring within 30 days
         </div>
     </div>
+
+<!-- Add Chemical modal -->
+<div class="modal-overlay" id="modalAddChem">
+    <div class="modal-box">
+        <button class="modal-close-btn" onclick="document.getElementById('modalAddChem').classList.remove('open')" aria-label="Close">&times;</button>
+        <div class="modal-title">Add New Chemical</div>
+
+        <?php if ($addErr): ?>
+            <div class="modal-alert-err"><?= htmlspecialchars($addErr) ?></div>
+        <?php endif; ?>
+
+        <form method="POST" action="inventory.php">
+            <input type="hidden" name="action" value="add_chemical">
+
+            <p class="form-section-lbl">Chemical Information</p>
+            <div class="form-grid-2">
+                <div class="f-field">
+                    <label>Chemical Name *</label>
+                    <input type="text" name="chem_name" required maxlength="100"
+                           placeholder="e.g. Ethanol"
+                           value="<?= htmlspecialchars($_POST['chem_name'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>CAS Number *</label>
+                    <input type="text" name="cas_number" required maxlength="50"
+                           placeholder="e.g. 64-17-5"
+                           value="<?= htmlspecialchars($_POST['cas_number'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Hazard Class *</label>
+                    <select name="hazard_class" required>
+                        <option value="">Select...</option>
+                        <?php foreach (['Flammable','Corrosive','Irritant','Low Hazard','Toxic','Oxidizer'] as $hc): ?>
+                            <option value="<?= htmlspecialchars($hc) ?>"
+                                <?= (($_POST['hazard_class'] ?? '') === $hc ? 'selected' : '') ?>>
+                                <?= htmlspecialchars($hc) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="f-field">
+                    <label>Default Unit *</label>
+                    <input type="text" name="default_unit" required maxlength="20"
+                           placeholder="e.g. mL, g"
+                           value="<?= htmlspecialchars($_POST['default_unit'] ?? '') ?>">
+                </div>
+            </div>
+
+            <p class="form-section-lbl">Batch Information</p>
+            <div class="form-grid-2">
+                <div class="f-field">
+                    <label>Supplier *</label>
+                    <select name="supplier_id" required>
+                        <option value="">Select supplier...</option>
+                        <?php foreach ($suppliers as $sup): ?>
+                            <option value="<?= (int)$sup['supplier_id'] ?>"
+                                <?= ((int)($_POST['supplier_id'] ?? 0) === (int)$sup['supplier_id'] ? 'selected' : '') ?>>
+                                <?= htmlspecialchars($sup['supplier_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="f-field">
+                    <label>Lot Number *</label>
+                    <input type="text" name="lot_number" required maxlength="50"
+                           placeholder="e.g. ETOH-2401"
+                           value="<?= htmlspecialchars($_POST['lot_number'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Received Date *</label>
+                    <input type="date" name="received_date" required
+                           value="<?= htmlspecialchars($_POST['received_date'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Expiration Date *</label>
+                    <input type="date" name="expiration_date" required
+                           value="<?= htmlspecialchars($_POST['expiration_date'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Concentration (optional)</label>
+                    <input type="number" name="concentration" step="0.01" min="0"
+                           placeholder="e.g. 0.50"
+                           value="<?= htmlspecialchars($_POST['concentration'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Unit Cost ($) *</label>
+                    <input type="number" name="unit_cost" step="0.01" min="0" required
+                           placeholder="e.g. 45.50"
+                           value="<?= htmlspecialchars($_POST['unit_cost'] ?? '') ?>">
+                </div>
+            </div>
+
+            <p class="form-section-lbl">Inventory Item</p>
+            <div class="form-grid-2">
+                <div class="f-field">
+                    <label>Storage Location *</label>
+                    <select name="location_id" required>
+                        <option value="">Select location...</option>
+                        <?php foreach ($locations as $loc): ?>
+                            <option value="<?= (int)$loc['location_id'] ?>"
+                                <?= ((int)($_POST['location_id'] ?? 0) === (int)$loc['location_id'] ? 'selected' : '') ?>>
+                                <?= htmlspecialchars($loc['location_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="f-field">
+                    <label>Quantity *</label>
+                    <input type="number" name="quantity" step="0.01" min="0" required
+                           placeholder="e.g. 500"
+                           value="<?= htmlspecialchars($_POST['quantity'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Unit *</label>
+                    <input type="text" name="unit" required maxlength="20"
+                           placeholder="e.g. mL, g"
+                           value="<?= htmlspecialchars($_POST['unit'] ?? '') ?>">
+                </div>
+                <div class="f-field">
+                    <label>Status *</label>
+                    <select name="inv_status">
+                        <?php foreach (['In Stock','Low Stock','Out of Stock'] as $st): ?>
+                            <option value="<?= htmlspecialchars($st) ?>"
+                                <?= (($_POST['inv_status'] ?? 'In Stock') === $st ? 'selected' : '') ?>>
+                                <?= htmlspecialchars($st) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer-row">
+                <button type="button" class="modal-cancel-btn" onclick="document.getElementById('modalAddChem').classList.remove('open')">Cancel</button>
+                <button type="submit" class="modal-save-btn">Save Chemical</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('modalAddChem').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+});
+<?php if ($addErr): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('modalAddChem').classList.add('open');
+});
+<?php endif; ?>
+</script>
+
 </main>
 
 <footer class="dash-footer">

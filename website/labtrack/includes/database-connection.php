@@ -2,7 +2,7 @@
 
 $type     = 'mysql';
 $server   = 'localhost';
-$db       = 'labtrack';
+$db       = 'venthaim_labtrack';
 $port     = '3306';
 $charset  = 'utf8mb4';
 
