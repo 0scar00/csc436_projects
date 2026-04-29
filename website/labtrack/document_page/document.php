@@ -112,8 +112,9 @@
 <!-- ── Navigation ─────────────────────────────────────────────────────────── -->
 <nav>
     <span class="brand">LabTrack</span>
-    <a href="../dashboard.html">Dashboard</a>
+    <a href="../dashboard.php">Dashboard</a>
     <a href="../inventory.php">Inventory</a>
+    <a href="../chem_usage.php">Chemical Usage</a>
     <a href="document.php">Documents</a>
     <a href="../logout.php">Log out (<?= htmlspecialchars($_SESSION['username'] ?? 'User') ?>)</a>
 </nav>

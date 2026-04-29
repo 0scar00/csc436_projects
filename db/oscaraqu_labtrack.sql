@@ -257,6 +257,29 @@ INSERT INTO `Usage_log` (`usage_id`, `experiment_id`, `inventory_item_id`, `used
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `staff_login`
+--
+
+CREATE TABLE `staff_login` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `staff_login`
+--
+
+INSERT INTO `staff_login` (`user_id`, `username`, `email`, `password`) VALUES
+(1, 'admin', 'admin@uri.edu', 'admin123');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `User`
 --
 

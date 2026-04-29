@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once 'config.php';
+require_once __DIR__ . '/config.php';
 
 $username = trim($_POST['username'] ?? '');
 $password = $_POST['password'] ?? '';
@@ -28,6 +28,15 @@ if (strlen($username) > 100 || strlen($password) > 255) {
 try {
     $pdo = getDB();
 
+    $tableExists = (bool) $pdo->query("SHOW TABLES LIKE 'staff_login'")->fetchColumn();
+    if (!$tableExists) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Login is not configured for this database. Import the staff_login table or update auth.php to match your schema.'
+        ]);
+        exit;
+    }
+
     // Fetch user by username only, then verify password separately
     $stmt = $pdo->prepare("SELECT user_id, username, email, password FROM staff_login WHERE username = ? LIMIT 1");
     $stmt->execute([$username]);
@@ -41,7 +50,7 @@ try {
         $_SESSION['username'] = $user['username'];
         $_SESSION['email']    = $user['email'];
 
-        echo json_encode(['success' => true, 'redirect' => 'dashboard.html']);
+        echo json_encode(['success' => true, 'redirect' => 'dashboard.php']);
     } else {
         // Generic message — do not reveal whether username or password was wrong
         echo json_encode(['success' => false, 'message' => 'Invalid username or password.']);

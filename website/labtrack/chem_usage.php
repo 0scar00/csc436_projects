@@ -398,7 +398,7 @@ function expBadge(string $s): string {
     </div>
 
     <nav class="topnav-links">
-        <a href="dashboard.html"  class="nav-link">Dashboard</a>
+        <a href="dashboard.php"  class="nav-link">Dashboard</a>
         <a href="inventory.php"   class="nav-link">Inventory</a>
         <a href="experiments.php" class="nav-link">Experiments</a>
         <a href="documents.php"   class="nav-link">Documents</a>

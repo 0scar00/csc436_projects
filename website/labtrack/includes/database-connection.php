@@ -1,9 +1,9 @@
 <?php
 
 $type     = 'mysql';
-$server   = 'localhost';
-$db       = 'venthaim_labtrack';
-$port     = '3306';
+$server   = '127.0.0.1';
+$db       = 'oscaraqu_labtrack';
+$port     = '3307';
 $charset  = 'utf8mb4';
 
 $username = 'root';   // default for XAMPP

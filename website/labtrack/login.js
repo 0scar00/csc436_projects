@@ -74,7 +74,7 @@ form.addEventListener('submit', async (e) => {
 
     if (data.success) {
       sessionStorage.setItem('labtrack_user', username);
-      window.location.href = data.redirect || 'dashboard.html';
+      window.location.href = data.redirect || 'dashboard.php';
     } else {
       showError(data.message || 'Login failed. Please try again.');
     }
