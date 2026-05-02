@@ -2,7 +2,7 @@
 // Database configuration for venthaim_labtrack on cPanel
 define('DB_HOST', '127.0.0.1');
 define('DB_PORT', '3307');
-define('DB_NAME', 'oscaraqu_labtrack');
+define('DB_NAME', 'labtrack');
 define('DB_USER', 'root');          // local XAMPP
 define('DB_PASS', '');              // local XAMPP (no password)
 define('DB_CHARSET', 'utf8mb4');

@@ -29,6 +29,7 @@ try {
     $pdo = getDB();
 
     $tableExists = (bool) $pdo->query("SHOW TABLES LIKE 'staff_login'")->fetchColumn();
+
     if (!$tableExists) {
         echo json_encode([
             'success' => false,
@@ -37,12 +38,12 @@ try {
         exit;
     }
 
-    // Fetch user by username only, then verify password separately
+    // Fetch user by username only, then verify hashed password separately
     $stmt = $pdo->prepare("SELECT user_id, username, email, password FROM staff_login WHERE username = ? LIMIT 1");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
-    if ($user && $user['password'] === $password) {
+    if ($user && password_verify($password, $user['password'])) {
         // Regenerate session ID to prevent session fixation
         session_regenerate_id(true);
 

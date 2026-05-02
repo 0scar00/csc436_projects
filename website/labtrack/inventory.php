@@ -684,18 +684,21 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
                     elseif (str_contains($hz, 'low'))  $hzClass = 'badge-low';
                     else                               $hzClass = 'badge-default';
 
-                    // Status badge — override with "Expired" if past expiration date
-                    $statusClass = match(strtolower($row['status'])) {
-                        'in stock'     => 'status-badge',
-                        'low stock'    => 'status-low',
-                        'out of stock' => 'status-out',
-                        default        => 'badge-default',
-                    };
-                    // If physically expired, override status display regardless of DB value
-                    $statusLabel = $row['status'];
+                    // AUTO STOCK STATUS (based on quantity)
+                    if ($row['quantity'] <= 0) {
+                        $statusLabel = 'Out of Stock';
+                        $statusClass = 'status-out';
+                    } elseif ($row['quantity'] <= 500) {
+                        $statusLabel = 'Low Stock';
+                        $statusClass = 'status-low';
+                    } else {
+                        $statusLabel = 'In Stock';
+                        $statusClass = 'status-badge';
+                    }
+                    // If expired, override everything
                     if ($daysLeft < 0) {
-                        $statusClass  = 'status-out';
-                        $statusLabel  = 'Expired';
+                        $statusLabel = 'Expired';
+                        $statusClass = 'status-out';
                     }
                 ?>
                 <tr class="<?= htmlspecialchars($rowClass) ?>">
