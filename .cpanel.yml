@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/oscaraqu/public_html/labtrack/
+    - export DEPLOYPATH=/home1/oscaraquino/public_html/labtrack/
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -R website/labtrack/* $DEPLOYPATH
