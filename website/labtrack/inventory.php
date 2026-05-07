@@ -678,11 +678,22 @@ $username = htmlspecialchars($_SESSION['username'] ?? 'User');
 
                     // Hazard badge
                     $hz = strtolower($row['hazard_class']);
-                    if (str_contains($hz, 'flamm'))    $hzClass = 'badge-flammable';
-                    elseif (str_contains($hz, 'corr')) $hzClass = 'badge-corrosive';
-                    elseif (str_contains($hz, 'irrit'))$hzClass = 'badge-irritant';
-                    elseif (str_contains($hz, 'low'))  $hzClass = 'badge-low';
-                    else                               $hzClass = 'badge-default';
+
+                    if (strpos($hz, 'flamm') !== false) {
+                        $hzClass = 'badge-flammable';
+                    }
+                    elseif (strpos($hz, 'corr') !== false) {
+                        $hzClass = 'badge-corrosive';
+                    }
+                    elseif (strpos($hz, 'irrit') !== false) {
+                        $hzClass = 'badge-irritant';
+                    }
+                    elseif (strpos($hz, 'low') !== false) {
+                        $hzClass = 'badge-low';
+                    }
+                    else {
+                        $hzClass = 'badge-default';
+                    }                          $hzClass = 'badge-default';
 
                     // AUTO STOCK STATUS (based on quantity)
                     if ($row['quantity'] <= 0) {

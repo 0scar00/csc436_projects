@@ -30,10 +30,23 @@ try {
 
 function badgeClass(string $hazard): string {
     $hazard = strtolower($hazard);
-    if (str_contains($hazard, 'flamm')) return 'badge-amber';
-    if (str_contains($hazard, 'corr')) return 'badge-red';
-    if (str_contains($hazard, 'irrit')) return 'badge-gray';
-    if (str_contains($hazard, 'low')) return 'badge-gray';
+
+    if (strpos($hazard, 'flamm') !== false) {
+        return 'badge-amber';
+    }
+
+    if (strpos($hazard, 'corr') !== false) {
+        return 'badge-red';
+    }
+
+    if (strpos($hazard, 'irrit') !== false) {
+        return 'badge-gray';
+    }
+
+    if (strpos($hazard, 'low') !== false) {
+        return 'badge-gray';
+    }
+
     return 'badge-gray';
 }
 
